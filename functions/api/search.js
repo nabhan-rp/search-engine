@@ -70,7 +70,6 @@ export async function onRequestGet(context) {
         query,
         page,
         spellcheckSuggestion,
-        spellcheckDebug: spellData.raw,
         hasMore: Boolean(data.query?.more_results_available),
         results
       },

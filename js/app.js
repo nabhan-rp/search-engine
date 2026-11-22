@@ -19,10 +19,14 @@
     localStorage.setItem("vz-search-theme", next);
   });
 
-  // 2. Sanitasi aman untuk snippet Brave (mempertahankan tag <strong> hasil highlight)
+  // 2. Decode entitas HTML dan pertahankan tag <strong> hasil highlight
   function sanitizeSnippet(rawHtml) {
+    const textarea = document.createElement("textarea");
+    textarea.innerHTML = rawHtml || "";
+    const decoded = textarea.value;
+
     const div = document.createElement("div");
-    div.textContent = rawHtml
+    div.textContent = decoded
       .replace(/<strong>/gi, "[[B_OPEN]]")
       .replace(/<\/strong>/gi, "[[B_CLOSE]]")
       .replace(/<[^>]+>/g, "");
@@ -71,13 +75,14 @@
         throw new Error(data.error || "Terjadi kesalahan saat mengambil hasil.");
       }
 
-      if (data.spellcheckSuggestion) {
+      const suggestion = data.spellcheckSuggestion || data.suggestion || null;
+      if (suggestion) {
         spellcheckBar.hidden = false;
         spellcheckBar.innerHTML = `Did you mean: <button type="button" class="spellcheck-link" id="spellcheckBtn"></button>`;
         const btn = document.getElementById("spellcheckBtn");
-        btn.textContent = data.spellcheckSuggestion;
+        btn.textContent = suggestion;
         btn.addEventListener("click", () => {
-          navigateToSearch(data.spellcheckSuggestion, 1);
+          navigateToSearch(suggestion, 1);
         });
       }
 
