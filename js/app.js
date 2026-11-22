@@ -19,16 +19,21 @@
   });
 
   // 2. Sanitasi aman untuk snippet Brave (mempertahankan tag <strong> hasil highlight)
-  function sanitizeSnippet(rawHtml) {
-    const div = document.createElement("div");
-    div.textContent = rawHtml
-      .replace(/<strong>/gi, "[[B_OPEN]]")
-      .replace(/<\/strong>/gi, "[[B_CLOSE]]")
-      .replace(/<[^>]+>/g, "");
-    return div.innerHTML
-      .replace(/\[\[B_OPEN\]\]/g, "<strong>")
-      .replace(/\[\[B_CLOSE\]\]/g, "</strong>");
-  }
+function sanitizeSnippet(rawHtml) {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = rawHtml || "";
+  const decoded = textarea.value;
+
+  const div = document.createElement("div");
+  div.textContent = decoded
+    .replace(/<strong>/gi, "[[B_OPEN]]")
+    .replace(/<\/strong>/gi, "[[B_CLOSE]]")
+    .replace(/<[^>]+>/g, "");
+
+  return div.innerHTML
+    .replace(/\[\[B_OPEN\]\]/g, "<strong>")
+    .replace(/\[\[B_CLOSE\]\]/g, "</strong>");
+}
 
   // 3. Fungsi Utama Pencarian
   async function runSearch(query, page = 1) {
