@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search — vz.gay</title>
+  <meta name="description" content="Mesin pencari web independen di search.vz.gay" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-wrapper">
+    <header class="topbar">
+      <a href="/" class="brand" id="brandHome">
+        <span class="brand-main">vz</span><span class="brand-dot">.gay</span>
+        <span class="brand-badge">Search</span>
+      </a>
+      <button id="themeToggle" class="theme-btn" aria-label="Ganti Tema" title="Ganti Tema">
+        🌓
+      </button>
+    </header>
+
+    <main class="main-container">
+      <div class="hero-header" id="heroHeader">
+        <h1>vz<span>.gay</span></h1>
+        <p>Cari informasi di seluruh web secara independen</p>
+      </div>
+
+      <section class="search-section">
+        <form id="searchForm" class="search-form" role="search">
+          <input
+            type="search"
+            id="searchInput"
+            name="q"
+            class="search-input"
+            placeholder="Ketik kata kunci pencarian..."
+            autocomplete="off"
+            required
+          />
+          <button type="submit" class="search-submit" aria-label="Cari">
+            Cari
+          </button>
+        </form>
+
+        <div id="statusBar" class="status-bar" hidden></div>
+        <div id="resultsContainer" class="results-container"></div>
+        <nav id="pagination" class="pagination" aria-label="Navigasi Halaman" hidden></nav>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2026 <strong>search.vz.gay</strong> &bull; Powered by Brave Search Index</p>
+    </footer>
+  </div>
+
+  <script src="/js/app.js" defer></script>
+</body>
+</html>
