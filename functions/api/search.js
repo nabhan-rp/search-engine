@@ -36,7 +36,7 @@ export async function onRequestGet(context) {
       ? fetchSpellcheck(query, env.BRAVE_SPELLCHECK_API_KEY)
       : Promise.resolve(null);
 
-    const [braveRes, spellcheckSuggestion] = await Promise.all([webPromise, spellcheckPromise]);
+    const [braveRes, spellcheckFromApi] = await Promise.all([webPromise, spellcheckPromise]);
 
     if (!braveRes.ok) {
       const errText = await braveRes.text();
@@ -48,6 +48,12 @@ export async function onRequestGet(context) {
 
     const data = await braveRes.json();
     const rawResults = data.web?.results || [];
+
+    // Ambil koreksi dari Spellcheck API, atau fallback ke auto-correction bawaan Web Search (data.query.altered)
+    const webAltered = typeof data.query?.altered === "string" ? data.query.altered.trim() : "";
+    const spellcheckSuggestion =
+      spellcheckFromApi ||
+      (webAltered && webAltered.toLowerCase() !== query.toLowerCase() ? webAltered : null);
 
     const results = rawResults.map((item) => ({
       title: item.title || "",
@@ -95,12 +101,10 @@ async function fetchSpellcheck(query, apiKey) {
     if (!res.ok) return null;
 
     const data = await res.json();
-    // Menyesuaikan beberapa kemungkinan struktur field respons Spellcheck Brave
     const candidate =
+      data.results?.[0]?.query ||
       data.query?.altered ||
       data.altered ||
-      data.results?.[0]?.query ||
-      data.corrections?.[0]?.text ||
       null;
 
     if (typeof candidate === "string") {
