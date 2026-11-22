@@ -7,6 +7,7 @@
   const resultsContainer = document.getElementById("resultsContainer");
   const paginationEl = document.getElementById("pagination");
   const brandHome = document.getElementById("brandHome");
+  const spellcheckBar = document.getElementById("spellcheckBar");
 
   // 1. Kelola Tema (Dark / Light)
   const savedTheme = localStorage.getItem("vz-search-theme") || "dark";
@@ -19,21 +20,16 @@
   });
 
   // 2. Sanitasi aman untuk snippet Brave (mempertahankan tag <strong> hasil highlight)
-function sanitizeSnippet(rawHtml) {
-  const textarea = document.createElement("textarea");
-  textarea.innerHTML = rawHtml || "";
-  const decoded = textarea.value;
-
-  const div = document.createElement("div");
-  div.textContent = decoded
-    .replace(/<strong>/gi, "[[B_OPEN]]")
-    .replace(/<\/strong>/gi, "[[B_CLOSE]]")
-    .replace(/<[^>]+>/g, "");
-
-  return div.innerHTML
-    .replace(/\[\[B_OPEN\]\]/g, "<strong>")
-    .replace(/\[\[B_CLOSE\]\]/g, "</strong>");
-}
+  function sanitizeSnippet(rawHtml) {
+    const div = document.createElement("div");
+    div.textContent = rawHtml
+      .replace(/<strong>/gi, "[[B_OPEN]]")
+      .replace(/<\/strong>/gi, "[[B_CLOSE]]")
+      .replace(/<[^>]+>/g, "");
+    return div.innerHTML
+      .replace(/\[\[B_OPEN\]\]/g, "<strong>")
+      .replace(/\[\[B_CLOSE\]\]/g, "</strong>");
+  }
 
   // 3. Fungsi Utama Pencarian
   async function runSearch(query, page = 1) {
@@ -44,6 +40,8 @@ function sanitizeSnippet(rawHtml) {
       document.title = "Search — vz.gay";
       searchInput.value = "";
       statusBar.hidden = true;
+      spellcheckBar.hidden = true;
+      spellcheckBar.innerHTML = "";
       resultsContainer.innerHTML = "";
       paginationEl.hidden = true;
       searchInput.focus();
@@ -56,6 +54,8 @@ function sanitizeSnippet(rawHtml) {
 
     statusBar.hidden = false;
     statusBar.textContent = `Mencari "${cleanQuery}"...`;
+    spellcheckBar.hidden = true;
+    spellcheckBar.innerHTML = "";
     resultsContainer.innerHTML = "";
     paginationEl.hidden = true;
 
@@ -69,6 +69,16 @@ function sanitizeSnippet(rawHtml) {
 
       if (!res.ok) {
         throw new Error(data.error || "Terjadi kesalahan saat mengambil hasil.");
+      }
+
+      if (data.spellcheckSuggestion) {
+        spellcheckBar.hidden = false;
+        spellcheckBar.innerHTML = `Did you mean: <button type="button" class="spellcheck-link" id="spellcheckBtn"></button>`;
+        const btn = document.getElementById("spellcheckBtn");
+        btn.textContent = data.spellcheckSuggestion;
+        btn.addEventListener("click", () => {
+          navigateToSearch(data.spellcheckSuggestion, 1);
+        });
       }
 
       const elapsed = ((performance.now() - startTime) / 1000).toFixed(2);
@@ -107,6 +117,8 @@ function sanitizeSnippet(rawHtml) {
       renderPagination(cleanQuery, page, data.hasMore);
     } catch (err) {
       statusBar.hidden = true;
+      spellcheckBar.hidden = true;
+      spellcheckBar.innerHTML = "";
       resultsContainer.innerHTML = `<div class="error-box">${err.message}</div>`;
     }
   }

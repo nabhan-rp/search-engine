@@ -12,7 +12,6 @@ export async function onRequestGet(context) {
     return jsonResponse({ error: "BRAVE_API_KEY belum diatur di Environment Variables Cloudflare." }, 500);
   }
 
-  // Brave Search menggunakan 0-based offset (0 = halaman 1, maksimal 9)
   const offset = page - 1;
   const braveUrl = new URL("https://api.search.brave.com/res/v1/web/search");
   braveUrl.searchParams.set("q", query);
@@ -20,19 +19,24 @@ export async function onRequestGet(context) {
   braveUrl.searchParams.set("offset", String(offset));
 
   try {
-    const braveRes = await fetch(braveUrl.toString(), {
+    const webPromise = fetch(braveUrl.toString(), {
       method: "GET",
       headers: {
         "Accept": "application/json",
         "Accept-Encoding": "gzip",
         "X-Subscription-Token": env.BRAVE_API_KEY
       },
-      // Cache di edge Cloudflare selama 600 detik (10 menit) untuk menghemat kuota API
       cf: {
         cacheEverything: true,
         cacheTtl: 600
       }
     });
+
+    const spellcheckPromise = env.BRAVE_SPELLCHECK_API_KEY
+      ? fetchSpellcheck(query, env.BRAVE_SPELLCHECK_API_KEY)
+      : Promise.resolve(null);
+
+    const [braveRes, spellcheckSuggestion] = await Promise.all([webPromise, spellcheckPromise]);
 
     if (!braveRes.ok) {
       const errText = await braveRes.text();
@@ -58,6 +62,7 @@ export async function onRequestGet(context) {
       {
         query,
         page,
+        spellcheckSuggestion,
         hasMore: Boolean(data.query?.more_results_available),
         results
       },
@@ -66,6 +71,47 @@ export async function onRequestGet(context) {
     );
   } catch (err) {
     return jsonResponse({ error: "Gagal menghubungi server Brave Search.", detail: err.message }, 502);
+  }
+}
+
+async function fetchSpellcheck(query, apiKey) {
+  try {
+    const spellUrl = new URL("https://api.search.brave.com/res/v1/spellcheck/search");
+    spellUrl.searchParams.set("q", query);
+
+    const res = await fetch(spellUrl.toString(), {
+      method: "GET",
+      headers: {
+        "Accept": "application/json",
+        "Accept-Encoding": "gzip",
+        "X-Subscription-Token": apiKey
+      },
+      cf: {
+        cacheEverything: true,
+        cacheTtl: 3600
+      }
+    });
+
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    // Menyesuaikan beberapa kemungkinan struktur field respons Spellcheck Brave
+    const candidate =
+      data.query?.altered ||
+      data.altered ||
+      data.results?.[0]?.query ||
+      data.corrections?.[0]?.text ||
+      null;
+
+    if (typeof candidate === "string") {
+      const trimmed = candidate.trim();
+      if (trimmed && trimmed.toLowerCase() !== query.toLowerCase()) {
+        return trimmed;
+      }
+    }
+    return null;
+  } catch {
+    return null;
   }
 }
 
