@@ -301,3 +301,51 @@ body.has-results .hero-header {
   color: var(--text-secondary);
   font-size: 0.85rem;
 }
+
+.search-engine-help {
+  max-width: 820px;
+  margin: 0.85rem auto 0;
+  text-align: left;
+}
+
+.search-engine-help summary {
+  cursor: pointer;
+  color: var(--accent-color);
+}
+
+.search-engine-help-content {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  line-height: 1.55;
+}
+
+.search-engine-table-wrap {
+  overflow-x: auto;
+}
+
+.search-engine-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.search-engine-table th,
+.search-engine-table td {
+  padding: 0.6rem;
+  border: 1px solid var(--border-color);
+  vertical-align: top;
+}
+
+.search-engine-table th {
+  color: var(--text-primary);
+  background: var(--surface-color);
+}
+
+.search-engine-help-content code {
+  overflow-wrap: anywhere;
+}
+
+.search-engine-help-content a {
+  color: var(--accent-color);
+}
