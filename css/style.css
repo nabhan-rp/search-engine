@@ -295,29 +295,68 @@ body.has-results .hero-header {
 
 /* Footer */
 .footer {
-  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
   padding: 1.25rem;
   border-top: 1px solid var(--border-color);
   color: var(--text-secondary);
   font-size: 0.85rem;
 }
 
+.footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-left: auto;
+}
+
 .search-engine-help {
-  max-width: 820px;
-  margin: 0.85rem auto 0;
+  position: relative;
   text-align: left;
 }
 
-.search-engine-help summary {
+.search-engine-help summary,
+.changelog summary {
   cursor: pointer;
   color: var(--accent-color);
 }
 
-.search-engine-help-content {
+.footer-panel-content {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.75rem);
+  z-index: 2;
+  width: min(820px, calc(100vw - 2.5rem));
+  max-height: min(65vh, 640px);
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--surface-color);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+}
+
+.footer-panel-content {
   display: grid;
   gap: 0.75rem;
-  margin-top: 0.75rem;
   line-height: 1.55;
+}
+
+.changelog {
+  position: relative;
+  text-align: left;
+}
+
+.changelog-content {
+  width: min(360px, calc(100vw - 2.5rem));
+}
+
+.changelog-content h2 {
+  color: var(--text-primary);
+  font-size: 1rem;
 }
 
 .search-engine-table-wrap {
@@ -348,4 +387,14 @@ body.has-results .hero-header {
 
 .search-engine-help-content a {
   color: var(--accent-color);
+}
+
+@media (max-width: 640px) {
+  .footer {
+    flex-direction: column;
+  }
+
+  .footer-actions {
+    width: 100%;
+  }
 }
